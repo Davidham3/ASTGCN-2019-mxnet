@@ -2,7 +2,7 @@
 Multi-Component Spatial-Temporal Graph Convolutional Networks (MSTGCN)
 
 # References
-AAAI 2019 《Attention Based Spatial-Temporal Graph Convolutional Networks for Traffic Flow Forecasting》
+AAAI 2019 《Attention Based Spatial-Temporal Graph Convolutional Networks for Traffic Flow Forecasting》  
 软件学报 2019 第三期 《面向交通流量预测的多组件时空图卷积网络》
 
 # Datasets
