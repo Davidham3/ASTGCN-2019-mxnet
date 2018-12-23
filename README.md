@@ -1,5 +1,5 @@
 # ASTGCN
-Multi-Component Spatial-Temporal Graph Convolutional Networks (MSTGCN)
+Attention Based Spatial-Temporal Graph Convolutional Networks (ASTGCN)
 
 # References
 AAAI 2019 《Attention Based Spatial-Temporal Graph Convolutional Networks for Traffic Flow Forecasting》  
