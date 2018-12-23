@@ -1,4 +1,4 @@
-# MSTGCN
+# ASTGCN
 Multi-Component Spatial-Temporal Graph Convolutional Networks (MSTGCN)
 
 # References
