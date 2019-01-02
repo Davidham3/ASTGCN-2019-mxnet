@@ -7,7 +7,6 @@ Attention Based Spatial-Temporal Graph Convolutional Networks for Traffic Flow F
 # References
 
 + Shengnan Guo, Youfang Lin, Ning Feng, Chao Song, Huaiyu Wan(*). Attention Based Spatial-Temporal Graph Convolutional Networks for Traffic Flow Forecasting. The 33rd AAAI Conference on Artificial Intelligence (AAAI'19) 2019.
-+ 冯宁, 郭晟楠, 宋超, 朱琪超, 万怀宇(*). 面向交通流量预测的多组件时空图卷积网络. 软件学报, 2019
 
 # Datasets
 
@@ -31,32 +30,43 @@ We provide two dataset: PEMS-04, PEMS-08
 
 + python3
 + mxnet >= 1.3.0
-+ tensorboard
 + mxboard
 + numpy
 + scipy
 + pandas
 + scikit-learn
 
-To install MXNet, you should follow the instruction provided by [this page](https://mxnet.incubator.apache.org/install/index.html?platform=Linux&language=Python&processor=CPU).
+To install MXNet correctly, you should follow the instruction provided by [this page](https://mxnet.incubator.apache.org/install/index.html?platform=Linux&language=Python&processor=CPU).
 
-The dependencies can be installed using the following command:
+To run mxboard, you have to install tensorflow and tensorboard.
+
+The other dependencies can be installed using the following command:
 ```
 pip install -r requirements.txt
 ```
 
 # Usage
 
-train model:
+train model on PEMS04:
 ```
-python train.py --config config.conf
+python train.py --config configurations/PEMS04.conf
+```
+
+train model on PEMS08:
+```
+python train.py --config configurations/PEMS08.conf
 ```
 
 visualize training progress:
 ```
-tensorboard --logdir=./logs --host=127.0.0.1 --port=6006
+tensorboard --logdir logs --port 6006
 ```
 then open [http://127.0.0.1:6006](http://127.0.0.1:6006) to explore the training process.
+
+load parameters and predict:
+```
+python predict.py --config configurations/PEMS04.conf
+```
 
 # Configuration
 
@@ -83,3 +93,10 @@ The configuration file config.conf contains two part: Data and Training.
 + num_of_days: int, how many days' data will be used
 + num_of_hours: int, how many hours' data will be used
 + K: int, K-order chebyshev polynomials will be used
++ prediction_filename: str, if you specify this parameter, it will save the prediction of current testing set into this file
++ params_dir: the folder to save parameters
+
+## Predict
++ params_file: str, path of parameters
++ data_file: str, path of input data, which should be in npz format, contain key "data"
++ prediction_filename: str, the folder to save prediction results

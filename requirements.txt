@@ -1,0 +1,4 @@
+scipy
+pandas
+scikit-learn
+mxboard
