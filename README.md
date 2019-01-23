@@ -68,9 +68,14 @@ load parameters and predict:
 python predict.py --config configurations/PEMS04.conf
 ```
 
+# Improvements
+
+1. We use gluon(MXNet) to implement our model instead of pytorch in this released version.
+2. We use convolutional operation to map the output of ASTGCN block to the label space because that can help the model achieve a better performance.
+
 # Configuration
 
-The configuration file config.conf contains two part: Data and Training.
+The configuration file config.conf contains three parts: Data, Training and Predict:
 
 ## Data
 
