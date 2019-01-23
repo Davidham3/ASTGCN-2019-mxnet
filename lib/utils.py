@@ -130,7 +130,6 @@ def get_adjacency_matrix(distance_df_filename, num_of_vertices):
     for row in distance_df.values:
         i, j = int(row[0]), int(row[1])
         A[i, j] = 1
-        A[j, i] = 1
     
     return A
 
