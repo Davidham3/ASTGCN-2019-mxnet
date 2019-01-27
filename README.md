@@ -61,7 +61,7 @@ visualize training progress:
 ```
 tensorboard --logdir logs --port 6006
 ```
-then open [http://127.0.0.1:6006](http://127.0.0.1:6006) to explore the training process.
+then open [http://127.0.0.1:6006](http://127.0.0.1:6006) to visualize the training process.
 
 load parameters and predict:
 ```
@@ -70,8 +70,7 @@ python predict.py --config configurations/PEMS04.conf
 
 # Improvements
 
-1. We use gluon(MXNet) to implement our model instead of pytorch in this released version.
-2. We use convolutional operation to map the output of ASTGCN block to the label space because that can help the model achieve a better performance.
+1. We use convolutional operation to map the output of ASTGCN block to the label space because that can help the model achieve a better performance.
 
 # Configuration
 
@@ -99,9 +98,9 @@ The configuration file config.conf contains three parts: Data, Training and Pred
 + num_of_hours: int, how many hours' data will be used
 + K: int, K-order chebyshev polynomials will be used
 + prediction_filename: str, if you specify this parameter, it will save the prediction of current testing set into this file
-+ params_dir: the folder to save parameters
++ params_dir: the folder for saving parameters
 
 ## Predict
 + params_file: str, path of parameters
 + data_file: str, path of input data, which should be in npz format, contain key "data"
-+ prediction_filename: str, the folder to save prediction results
++ prediction_filename: str, the folder for saving prediction results
