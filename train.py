@@ -24,7 +24,7 @@ import configparser
 import argparse
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--config", type = str, help = "configuration file path", required = True)
+parser.add_argument("--config", type=str, help="configuration file path", required=True)
 args = parser.parse_args()
 
 # mxboard log dir
@@ -60,7 +60,7 @@ num_of_hours                  = int(training_config['num_of_hours'])
 if ctx.startswith('cpu'):
     ctx = mx.cpu()
 elif ctx.startswith('gpu'):
-    ctx = mx.gpu(int(ctx.split('-')[1]))
+    ctx = mx.gpu(int(ctx[ctx.index('-') + 1: ]))
 
 # import model
 print('model is %s'%(model_name))
@@ -105,37 +105,37 @@ if __name__ == "__main__":
     # training set data loader
     train_loader = gluon.data.DataLoader(
                         gluon.data.ArrayDataset(
-                            nd.array(all_data['train']['week'], ctx = ctx),
-                            nd.array(all_data['train']['day'], ctx = ctx),
-                            nd.array(all_data['train']['recent'], ctx = ctx),
-                            nd.array(all_data['train']['target'], ctx = ctx)
+                            nd.array(all_data['train']['week'], ctx=ctx),
+                            nd.array(all_data['train']['day'], ctx=ctx),
+                            nd.array(all_data['train']['recent'], ctx=ctx),
+                            nd.array(all_data['train']['target'], ctx=ctx)
                         ),
-                        batch_size = batch_size,
-                        shuffle = True
+                        batch_size=batch_size,
+                        shuffle=True
     )
 
     # validation set data loader
     val_loader = gluon.data.DataLoader(
                     gluon.data.ArrayDataset(
-                        nd.array(all_data['val']['week'], ctx = ctx),
-                        nd.array(all_data['val']['day'], ctx = ctx),
-                        nd.array(all_data['val']['recent'], ctx = ctx),
-                        nd.array(all_data['val']['target'], ctx = ctx)
+                        nd.array(all_data['val']['week'], ctx=ctx),
+                        nd.array(all_data['val']['day'], ctx=ctx),
+                        nd.array(all_data['val']['recent'], ctx=ctx),
+                        nd.array(all_data['val']['target'], ctx=ctx)
                     ),
-                    batch_size = batch_size,
-                    shuffle = False
+                    batch_size=batch_size,
+                    shuffle=False
     )
 
     # testing set data loader
     test_loader = gluon.data.DataLoader(
                     gluon.data.ArrayDataset(
-                        nd.array(all_data['test']['week'], ctx = ctx),
-                        nd.array(all_data['test']['day'], ctx = ctx),
-                        nd.array(all_data['test']['recent'], ctx = ctx),
-                        nd.array(all_data['test']['target'], ctx = ctx)
+                        nd.array(all_data['test']['week'], ctx=ctx),
+                        nd.array(all_data['test']['day'], ctx=ctx),
+                        nd.array(all_data['test']['recent'], ctx=ctx),
+                        nd.array(all_data['test']['target'], ctx=ctx)
                     ),
-                    batch_size = batch_size,
-                    shuffle = False
+                    batch_size=batch_size,
+                    shuffle=False
     )
 
     # save Z-score mean and std
@@ -156,23 +156,23 @@ if __name__ == "__main__":
     all_backbones = get_backbones(args.config, adj_filename, ctx)
 
     net = model(num_for_predict, all_backbones)
-    net.initialize(ctx = ctx)
+    net.initialize(ctx=ctx)
     for val_w, val_d, val_r, val_t in val_loader:
         net([val_w, val_d, val_r])
         break
-    net.initialize(ctx = ctx, init = MyInit(), force_reinit = True)
+    net.initialize(ctx=ctx, init=MyInit(), force_reinit=True)
 
     # initialize a trainer to train model
     trainer = gluon.Trainer(net.collect_params(), optimizer, {'learning_rate': learning_rate})
 
     # initialize a SummaryWriter to write information into logs dir
-    sw = SummaryWriter(logdir = params_path, flush_secs = 5)
+    sw = SummaryWriter(logdir=params_path, flush_secs=5)
 
     # compute validation loss before training
-    compute_val_loss(net, val_loader, loss_function, sw, 0)
+    compute_val_loss(net, val_loader, loss_function, sw, epoch=0)
 
     # compute testing set MAE, RMSE, MAPE before training
-    evaluate(net, test_loader, true_value, num_of_vertices, sw, 0)
+    evaluate(net, test_loader, true_value, num_of_vertices, sw, epoch=0)
 
     # train model
     global_step = 1
@@ -189,7 +189,7 @@ if __name__ == "__main__":
             trainer.step(train_t.shape[0])
             training_loss = l.mean().asscalar()
 
-            sw.add_scalar(tag = 'training_loss', value = training_loss, global_step = global_step)
+            sw.add_scalar(tag='training_loss', value=training_loss, global_step=global_step)
             
             print('global step: %s, training loss: %.2f, time: %.2fs'\
                 %(global_step, training_loss, time() - start_time))
@@ -198,7 +198,7 @@ if __name__ == "__main__":
         # logging the gradients of parameters for checking convergence
         for name, param in net.collect_params().items():
             try:
-                sw.add_histogram(tag = name + "_grad", values = param.grad(), global_step = global_step, bins = 1000)
+                sw.add_histogram(tag=name + "_grad", values=param.grad(), global_step=global_step, bins=1000)
             except:
                 print(name)
                 print(param.grad())

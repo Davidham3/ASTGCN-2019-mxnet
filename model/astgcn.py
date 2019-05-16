@@ -13,11 +13,11 @@ class Spatial_Attention_layer(nn.Block):
     def __init__(self, **kwargs):
         super(Spatial_Attention_layer, self).__init__(**kwargs)
         with self.name_scope():
-            self.W_1 = self.params.get('W_1', allow_deferred_init = True)
-            self.W_2 = self.params.get('W_2', allow_deferred_init = True)
-            self.W_3 = self.params.get('W_3', allow_deferred_init = True)
-            self.b_s = self.params.get('b_s', allow_deferred_init = True)
-            self.V_s = self.params.get('V_s', allow_deferred_init = True)
+            self.W_1 = self.params.get('W_1', allow_deferred_init=True)
+            self.W_2 = self.params.get('W_2', allow_deferred_init=True)
+            self.W_3 = self.params.get('W_3', allow_deferred_init=True)
+            self.b_s = self.params.get('b_s', allow_deferred_init=True)
+            self.V_s = self.params.get('V_s', allow_deferred_init=True)
     
     def forward(self, x):
         '''
@@ -56,9 +56,9 @@ class Spatial_Attention_layer(nn.Block):
         S = nd.dot(self.V_s.data(), nd.sigmoid(product + self.b_s.data()).transpose((1, 2, 0))).transpose((2, 0, 1))
         
         # normalization
-        S = S - nd.max(S, axis = 1, keepdims = True)
+        S = S - nd.max(S, axis=1, keepdims=True)
         exp = nd.exp(S)
-        S_normalized = exp / nd.sum(exp, axis = 1, keepdims = True)
+        S_normalized = exp / nd.sum(exp, axis=1, keepdims=True)
         return S_normalized
         
 class cheb_conv_with_SAt(nn.Block):
@@ -81,7 +81,7 @@ class cheb_conv_with_SAt(nn.Block):
         self.num_of_filters = num_of_filters
         self.cheb_polynomials = cheb_polynomials
         with self.name_scope():
-            self.Theta = self.params.get('Theta', allow_deferred_init = True)
+            self.Theta = self.params.get('Theta', allow_deferred_init=True)
     
     def forward(self, x, spatial_attention):
         '''
@@ -107,7 +107,7 @@ class cheb_conv_with_SAt(nn.Block):
         for time_step in range(num_of_timesteps):
             # shape is (batch_size, V, F)
             graph_signal = x[:, :, :, time_step]
-            output = nd.zeros(shape = (batch_size, num_of_vertices, self.num_of_filters), ctx = x.context)
+            output = nd.zeros(shape=(batch_size, num_of_vertices, self.num_of_filters), ctx=x.context)
             for k in range(self.K):
 
                 # shape of T_k is (V, V)
@@ -124,7 +124,7 @@ class cheb_conv_with_SAt(nn.Block):
 
                 output = output + nd.dot(rhs, theta_k)
             outputs.append(output.expand_dims(-1))
-        return nd.relu(nd.concat(*outputs, dim = -1))
+        return nd.relu(nd.concat(*outputs, dim=-1))
         
 class Temporal_Attention_layer(nn.Block):
     '''
@@ -133,11 +133,11 @@ class Temporal_Attention_layer(nn.Block):
     def __init__(self, **kwargs):
         super(Temporal_Attention_layer, self).__init__(**kwargs)
         with self.name_scope():
-            self.U_1 = self.params.get('U_1', allow_deferred_init = True)
-            self.U_2 = self.params.get('U_2', allow_deferred_init = True)
-            self.U_3 = self.params.get('U_3', allow_deferred_init = True)
-            self.b_e = self.params.get('b_e', allow_deferred_init = True)
-            self.V_e = self.params.get('V_e', allow_deferred_init = True)
+            self.U_1 = self.params.get('U_1', allow_deferred_init=True)
+            self.U_2 = self.params.get('U_2', allow_deferred_init=True)
+            self.U_3 = self.params.get('U_3', allow_deferred_init=True)
+            self.b_e = self.params.get('b_e', allow_deferred_init=True)
+            self.V_e = self.params.get('V_e', allow_deferred_init=True)
     
     def forward(self, x):
         '''
@@ -174,9 +174,9 @@ class Temporal_Attention_layer(nn.Block):
         E = nd.dot(self.V_e.data(), nd.sigmoid(product + self.b_e.data()).transpose((1, 2, 0))).transpose((2, 0, 1))
         
         # normailzation
-        E = E - nd.max(E, axis = 1, keepdims = True)
+        E = E - nd.max(E, axis=1, keepdims=True)
         exp = nd.exp(E)
-        E_normalized = exp / nd.sum(exp, axis = 1, keepdims = True)
+        E_normalized = exp / nd.sum(exp, axis=1, keepdims=True)
         return E_normalized
         
 class ASTGCN_block(nn.Block):
@@ -197,11 +197,11 @@ class ASTGCN_block(nn.Block):
         
         with self.name_scope():
             self.SAt = Spatial_Attention_layer()
-            self.cheb_conv_SAt = cheb_conv_with_SAt(num_of_filters = num_of_chev_filters, K = K, cheb_polynomials = cheb_polynomials)
+            self.cheb_conv_SAt = cheb_conv_with_SAt(num_of_filters=num_of_chev_filters, K=K, cheb_polynomials=cheb_polynomials)
             self.TAt = Temporal_Attention_layer()
-            self.time_conv = nn.Conv2D(channels = num_of_time_filters, kernel_size = (1, 3), padding = (0, 1), strides = (1, time_conv_strides))
-            self.residual_conv = nn.Conv2D(channels = num_of_time_filters, kernel_size = (1, 1), strides = (1, time_conv_strides))
-            self.ln = nn.LayerNorm(axis = 2)
+            self.time_conv = nn.Conv2D(channels=num_of_time_filters, kernel_size=(1, 3), padding=(0, 1), strides=(1, time_conv_strides))
+            self.residual_conv = nn.Conv2D(channels=num_of_time_filters, kernel_size=(1, 1), strides=(1, time_conv_strides))
+            self.ln = nn.LayerNorm(axis=2)
             
     def forward(self, x):
         '''
@@ -257,8 +257,8 @@ class ASTGCN_submodule(nn.Block):
 
         with self.name_scope():
             # use convolution to generate the prediction, instead of using the fully connected layer
-            self.final_conv = nn.Conv2D(channels = num_for_prediction, kernel_size = (1, backbones[-1]['num_of_time_filters']))
-            self.W = self.params.get("W", allow_deferred_init = True)
+            self.final_conv = nn.Conv2D(channels=num_for_prediction, kernel_size=(1, backbones[-1]['num_of_time_filters']))
+            self.W = self.params.get("W", allow_deferred_init=True)
 
     def forward(self, x):
         '''
