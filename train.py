@@ -1,5 +1,12 @@
 # -*- coding:utf-8 -*-
 
+import os
+import shutil
+from time import time
+from datetime import datetime
+import configparser
+import argparse
+
 import mxnet as mx
 from mxnet import nd
 from mxnet import gluon
@@ -15,13 +22,6 @@ from lib.utils import predict
 
 from lib.data_preparation import read_and_generate_dataset
 from model.model_config import get_backbones
-
-import os
-import shutil
-from time import time
-from datetime import datetime
-import configparser
-import argparse
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--config", type=str, help="configuration file path", required=True)
@@ -39,22 +39,22 @@ config.read(args.config)
 data_config = config['Data']
 training_config = config['Training']
 
-adj_filename                  = data_config['adj_filename']
-graph_signal_matrix_filename  = data_config['graph_signal_matrix_filename']
-num_of_vertices               = int(data_config['num_of_vertices'])
-num_of_features               = int(data_config['num_of_features'])
-points_per_hour               = int(data_config['points_per_hour'])
-num_for_predict               = int(data_config['num_for_predict'])
+adj_filename = data_config['adj_filename']
+graph_signal_matrix_filename = data_config['graph_signal_matrix_filename']
+num_of_vertices = int(data_config['num_of_vertices'])
+num_of_features = int(data_config['num_of_features'])
+points_per_hour = int(data_config['points_per_hour'])
+num_for_predict = int(data_config['num_for_predict'])
 
-model_name                    = training_config['model_name']
-ctx                           = training_config['ctx']
-optimizer                     = training_config['optimizer']
-learning_rate                 = float(training_config['learning_rate'])
-epochs                        = int(training_config['epochs'])
-batch_size                    = int(training_config['batch_size'])
-num_of_weeks                  = int(training_config['num_of_weeks'])
-num_of_days                   = int(training_config['num_of_days'])
-num_of_hours                  = int(training_config['num_of_hours'])
+model_name = training_config['model_name']
+ctx = training_config['ctx']
+optimizer = training_config['optimizer']
+learning_rate = float(training_config['learning_rate'])
+epochs = int(training_config['epochs'])
+batch_size = int(training_config['batch_size'])
+num_of_weeks = int(training_config['num_of_weeks'])
+num_of_days = int(training_config['num_of_days'])
+num_of_hours = int(training_config['num_of_hours'])
 
 # select devices
 if ctx.startswith('cpu'):
@@ -84,9 +84,11 @@ if not os.path.exists(params_path):
 else:
     raise SystemExit("params folder exists! select a new params path please")
 
+
 class MyInit(mx.init.Initializer):
     xavier = mx.init.Xavier()
     uniform = mx.init.Uniform()
+
     def _init_weight(self, name, data):
         if len(data.shape) < 2:
             self.uniform._init_weight(name, data)
@@ -96,11 +98,19 @@ class MyInit(mx.init.Initializer):
             print('Init', name, data.shape, 'with Xavier')
 
 if __name__ == "__main__":
-    # read all data from graph singal matrix file
-    all_data = read_and_generate_dataset(graph_signal_matrix_filename, num_of_vertices, num_of_features, num_of_weeks, num_of_days, num_of_hours, points_per_hour, num_for_predict)
+    # read all data from graph signal matrix file
+    all_data = read_and_generate_dataset(graph_signal_matrix_filename,
+                                         num_of_vertices,
+                                         num_of_features,
+                                         num_of_weeks,
+                                         num_of_days,
+                                         num_of_hours,
+                                         points_per_hour,
+                                         num_for_predict)
 
     # test set ground truth
-    true_value = all_data['test']['target'].transpose((0, 2, 1)).reshape(all_data['test']['target'].shape[0], -1)
+    true_value = all_data['test']['target']\
+        .transpose((0, 2, 1)).reshape(all_data['test']['target'].shape[0], -1)
 
     # training set data loader
     train_loader = gluon.data.DataLoader(
@@ -177,11 +187,11 @@ if __name__ == "__main__":
     # train model
     global_step = 1
     for epoch in range(1, epochs + 1):
-        
+
         for train_w, train_d, train_r, train_t in train_loader:
-            
+
             start_time = time()
-            
+
             with autograd.record():
                 output = net([train_w, train_d, train_r])
                 l = loss_function(output, train_t)
@@ -189,16 +199,21 @@ if __name__ == "__main__":
             trainer.step(train_t.shape[0])
             training_loss = l.mean().asscalar()
 
-            sw.add_scalar(tag='training_loss', value=training_loss, global_step=global_step)
-            
-            print('global step: %s, training loss: %.2f, time: %.2fs'\
-                %(global_step, training_loss, time() - start_time))
+            sw.add_scalar(tag='training_loss',
+                          value=training_loss,
+                          global_step=global_step)
+
+            print('global step: %s, training loss: %.2f, time: %.2fs'
+                  % (global_step, training_loss, time() - start_time))
             global_step += 1
 
         # logging the gradients of parameters for checking convergence
         for name, param in net.collect_params().items():
             try:
-                sw.add_histogram(tag=name + "_grad", values=param.grad(), global_step=global_step, bins=1000)
+                sw.add_histogram(tag=name + "_grad",
+                                 values=param.grad(),
+                                 global_step=global_step,
+                                 bins=1000)
             except:
                 print(name)
                 print(param.grad())
@@ -209,10 +224,12 @@ if __name__ == "__main__":
         # evaluate the model on testing set
         evaluate(net, test_loader, true_value, num_of_vertices, sw, epoch)
 
-        params_filename = os.path.join(params_path, '%s_epoch_%s.params'%(model_name, epoch))
+        params_filename = os.path.join(params_path,
+                                       '%s_epoch_%s.params' % (model_name,
+                                                               epoch))
         net.save_parameters(params_filename)
-        print('save parameters to file: %s'%(params_filename))
-    
+        print('save parameters to file: %s' % (params_filename))
+
     # close SummaryWriter
     sw.close()
 
@@ -222,7 +239,7 @@ if __name__ == "__main__":
         prediction = predict(net, test_loader)
 
         np.savez_compressed(
-            os.path.normpath(prediction_path), 
-            prediction = prediction,
-            ground_truth = all_data['test']['target']
+            os.path.normpath(prediction_path),
+            prediction=prediction,
+            ground_truth=all_data['test']['target']
         )
