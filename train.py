@@ -24,7 +24,8 @@ from lib.data_preparation import read_and_generate_dataset
 from model.model_config import get_backbones
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--config", type=str, help="configuration file path", required=True)
+parser.add_argument("--config", type=str,
+                    help="configuration file path", required=True)
 args = parser.parse_args()
 
 # mxboard log dir
@@ -34,7 +35,7 @@ if os.path.exists('logs'):
 
 # read configuration
 config = configparser.ConfigParser()
-print('read configuration file: %s'%(args.config))
+print('read configuration file: %s' % (args.config))
 config.read(args.config)
 data_config = config['Data']
 training_config = config['Training']
@@ -60,10 +61,10 @@ num_of_hours = int(training_config['num_of_hours'])
 if ctx.startswith('cpu'):
     ctx = mx.cpu()
 elif ctx.startswith('gpu'):
-    ctx = mx.gpu(int(ctx[ctx.index('-') + 1: ]))
+    ctx = mx.gpu(int(ctx[ctx.index('-') + 1:]))
 
 # import model
-print('model is %s'%(model_name))
+print('model is %s' % (model_name))
 if model_name == 'MSTGCN':
     from model.mstgcn import MSTGCN as model
 elif model_name == 'ASTGCN':
@@ -76,11 +77,11 @@ timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
 if 'params_dir' in training_config and training_config['params_dir'] != "None":
     params_path = os.path.join(training_config['params_dir'], model_name)
 else:
-    params_path = 'params/%s_%s/'%(model_name, timestamp)
+    params_path = 'params/%s_%s/' % (model_name, timestamp)
 
 if not os.path.exists(params_path):
     os.makedirs(params_path)
-    print('create params directory %s'%(params_path))
+    print('create params directory %s' % (params_path))
 else:
     raise SystemExit("params folder exists! select a new params path please")
 
@@ -173,7 +174,8 @@ if __name__ == "__main__":
     net.initialize(ctx=ctx, init=MyInit(), force_reinit=True)
 
     # initialize a trainer to train model
-    trainer = gluon.Trainer(net.collect_params(), optimizer, {'learning_rate': learning_rate})
+    trainer = gluon.Trainer(net.collect_params(), optimizer,
+                            {'learning_rate': learning_rate})
 
     # initialize a SummaryWriter to write information into logs dir
     sw = SummaryWriter(logdir=params_path, flush_secs=5)
