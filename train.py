@@ -53,7 +53,7 @@ batch_size = int(training_config['batch_size'])
 num_of_weeks = int(training_config['num_of_weeks'])
 num_of_days = int(training_config['num_of_days'])
 num_of_hours = int(training_config['num_of_hours'])
-merge = bool(training_config['merge'])
+merge = bool(int(training_config['merge']))
 
 # select devices
 if ctx.startswith('cpu'):
