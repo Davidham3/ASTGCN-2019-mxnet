@@ -1,3 +1,7 @@
 *.pyc
 *.params
 experiment*/
+__pycache__/
+venv/
+.vscode/
+.pytest_cache/

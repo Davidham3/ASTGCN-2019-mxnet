@@ -1,4 +1,5 @@
 scipy
-pandas
-scikit-learn
 mxboard
+tensorboard
+pytest
+pytest-xdist

@@ -28,33 +28,40 @@ We provide two dataset: PEMS-04, PEMS-08
 
 # Requirements
 
-+ python3
++ python >= 3.5
 + mxnet >= 1.3.0
 + mxboard
-+ numpy
 + scipy
-+ pandas
-+ scikit-learn
++ tensorboard
 
 To install MXNet correctly, you should follow the instruction provided by [this page](https://mxnet.incubator.apache.org/install/index.html?platform=Linux&language=Python&processor=CPU).
 
-To run mxboard, you have to install tensorflow and tensorboard.
+To run mxboard, you have to install tensorboard.
 
-The other dependencies can be installed using the following command:
+Other dependencies can be installed using the following command:
 ```
 pip install -r requirements.txt
+```
+
+If you are using docker, install [nvidia-docker](https://github.com/NVIDIA/nvidia-docker) and run the commands below:
+```bash
+# build image
+docker build -t astgcn/mxnet:1.4.1_cu100_mkl_py35 -f docker/Dockerfile .
+
+# training model in background
+docker run -d -it --rm --runtime=nvidia -v $PWD:/mxnet --name astgcn astgcn/mxnet:1.4.1_cu100_mkl_py35 python3 train.py --config configurations/PEMS04.conf --force True
 ```
 
 # Usage
 
 train model on PEMS04:
 ```
-python train.py --config configurations/PEMS04.conf
+python train.py --config configurations/PEMS04.conf --force True
 ```
 
 train model on PEMS08:
 ```
-python train.py --config configurations/PEMS08.conf
+python train.py --config configurations/PEMS08.conf --force True
 ```
 
 visualize training progress:
@@ -62,11 +69,6 @@ visualize training progress:
 tensorboard --logdir logs --port 6006
 ```
 then open [http://127.0.0.1:6006](http://127.0.0.1:6006) to visualize the training process.
-
-load parameters and predict:
-```
-python predict.py --config configurations/PEMS04.conf
-```
 
 # Improvements
 
@@ -81,7 +83,6 @@ The configuration file config.conf contains three parts: Data, Training and Pred
 + adj_filename: path of the adjacency matrix file
 + graph_signal_matrix_filename: path of graph signal matrix file
 + num_of_vertices: number of vertices
-+ num_of_features: number of features
 + points_per_hour: points per hour, in our dataset is 12
 + num_for_predict: points to predict, in our model is 12
 
@@ -97,6 +98,7 @@ The configuration file config.conf contains three parts: Data, Training and Pred
 + num_of_days: int, how many days' data will be used
 + num_of_hours: int, how many hours' data will be used
 + K: int, K-order chebyshev polynomials will be used
++ merge: int, 0 or 1, if merge equals 1, merge training set and validation set to train model
 + prediction_filename: str, if you specify this parameter, it will save the prediction of current testing set into this file
 + params_dir: the folder for saving parameters
 

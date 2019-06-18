@@ -1,11 +1,8 @@
 # -*- coding:utf-8 -*-
 # pylint: disable=no-member
 
-import numpy as np
-
-import mxnet as mx
-from mxnet.gluon import nn
 from mxnet import nd
+from mxnet.gluon import nn
 
 
 class Spatial_Attention_layer(nn.Block):
@@ -287,10 +284,9 @@ class ASTGCN_submodule(nn.Block):
         '''
         super(ASTGCN_submodule, self).__init__(**kwargs)
 
-        self.blocks = []
+        self.blocks = nn.Sequential()
         for backbone in backbones:
-            self.blocks.append(ASTGCN_block(backbone))
-            self.register_child(self.blocks[-1])
+            self.blocks.add(ASTGCN_block(backbone))
 
         with self.name_scope():
             # use convolution to generate the prediction
@@ -313,8 +309,7 @@ class ASTGCN_submodule(nn.Block):
         mx.ndarray, shape is (batch_size, num_of_vertices, num_for_prediction)
 
         '''
-        for block in self.blocks:
-            x = block(x)
+        x = self.blocks(x)
         module_output = (self.final_conv(x.transpose((0, 3, 1, 2)))
                          [:, :, :, -1].transpose((0, 2, 1)))
         _, num_of_vertices, num_for_prediction = module_output.shape

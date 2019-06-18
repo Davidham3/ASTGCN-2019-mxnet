@@ -7,35 +7,33 @@ from datetime import datetime
 import configparser
 import argparse
 
+import numpy as np
+
 import mxnet as mx
 from mxnet import nd
 from mxnet import gluon
 from mxnet import autograd
 from mxboard import SummaryWriter
 
-import numpy as np
-from sklearn.preprocessing import StandardScaler
-
-from lib.utils import compute_val_loss
-from lib.utils import evaluate
-from lib.utils import predict
-
+from lib.utils import compute_val_loss, evaluate, predict
 from lib.data_preparation import read_and_generate_dataset
 from model.model_config import get_backbones
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--config", type=str,
                     help="configuration file path", required=True)
+parser.add_argument("--force", type=str, default=False,
+                    help="remove params dir", required=False)
 args = parser.parse_args()
 
 # mxboard log dir
 if os.path.exists('logs'):
     shutil.rmtree('logs')
-    print('remove log dir')
+    print('Remove log dir')
 
 # read configuration
 config = configparser.ConfigParser()
-print('read configuration file: %s' % (args.config))
+print('Read configuration file: %s' % (args.config))
 config.read(args.config)
 data_config = config['Data']
 training_config = config['Training']
@@ -43,7 +41,6 @@ training_config = config['Training']
 adj_filename = data_config['adj_filename']
 graph_signal_matrix_filename = data_config['graph_signal_matrix_filename']
 num_of_vertices = int(data_config['num_of_vertices'])
-num_of_features = int(data_config['num_of_features'])
 points_per_hour = int(data_config['points_per_hour'])
 num_for_predict = int(data_config['num_for_predict'])
 
@@ -56,6 +53,7 @@ batch_size = int(training_config['batch_size'])
 num_of_weeks = int(training_config['num_of_weeks'])
 num_of_days = int(training_config['num_of_days'])
 num_of_hours = int(training_config['num_of_hours'])
+merge = bool(training_config['merge'])
 
 # select devices
 if ctx.startswith('cpu'):
@@ -64,7 +62,7 @@ elif ctx.startswith('gpu'):
     ctx = mx.gpu(int(ctx[ctx.index('-') + 1:]))
 
 # import model
-print('model is %s' % (model_name))
+print('Model is %s' % (model_name))
 if model_name == 'MSTGCN':
     from model.mstgcn import MSTGCN as model
 elif model_name == 'ASTGCN':
@@ -79,11 +77,14 @@ if 'params_dir' in training_config and training_config['params_dir'] != "None":
 else:
     params_path = 'params/%s_%s/' % (model_name, timestamp)
 
-if not os.path.exists(params_path):
-    os.makedirs(params_path)
-    print('create params directory %s' % (params_path))
+# check parameters file
+if os.path.exists(params_path) and not args.force:
+    raise SystemExit("Params folder exists! Select a new params path please!")
 else:
-    raise SystemExit("params folder exists! select a new params path please")
+    if os.path.exists(params_path):
+        shutil.rmtree(params_path)
+    os.makedirs(params_path)
+    print('Create params directory %s' % (params_path))
 
 
 class MyInit(mx.init.Initializer):
@@ -100,18 +101,18 @@ class MyInit(mx.init.Initializer):
 
 if __name__ == "__main__":
     # read all data from graph signal matrix file
+    print("Reading data...")
     all_data = read_and_generate_dataset(graph_signal_matrix_filename,
-                                         num_of_vertices,
-                                         num_of_features,
                                          num_of_weeks,
                                          num_of_days,
                                          num_of_hours,
+                                         num_for_predict,
                                          points_per_hour,
-                                         num_for_predict)
+                                         merge)
 
     # test set ground truth
-    true_value = all_data['test']['target']\
-        .transpose((0, 2, 1)).reshape(all_data['test']['target'].shape[0], -1)
+    true_value = (all_data['test']['target'].transpose((0, 2, 1))
+                  .reshape(all_data['test']['target'].shape[0], -1))
 
     # training set data loader
     train_loader = gluon.data.DataLoader(
@@ -150,14 +151,14 @@ if __name__ == "__main__":
     )
 
     # save Z-score mean and std
-    transformer_data = {}
+    stats_data = {}
     for type_ in ['week', 'day', 'recent']:
-        transformer = all_data['transformer'][type_]
-        transformer_data[type_ + '_mean'] = transformer.mean_
-        transformer_data[type_ + '_std'] = transformer.scale_
+        stats = all_data['stats'][type_]
+        stats_data[type_ + '_mean'] = stats['mean']
+        stats_data[type_ + '_std'] = stats['std']
     np.savez_compressed(
-        os.path.join(params_path, 'transformer_data'),
-        **transformer_data
+        os.path.join(params_path, 'stats_data'),
+        **stats_data
     )
 
     # loss function MSE

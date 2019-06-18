@@ -1,11 +1,8 @@
 # -*- coding:utf-8 -*-
 # pylint: disable=no-member
 
-import numpy as np
-
-import mxnet as mx
-from mxnet.gluon import nn
 from mxnet import nd
+from mxnet.gluon import nn
 
 
 class cheb_conv(nn.Block):

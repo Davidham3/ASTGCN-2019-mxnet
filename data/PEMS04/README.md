@@ -1,1 +1,0 @@
-We split data into 6:2:2 in data.npz, merge the training set and validation set as a new training set in data2.npz, because in our experiments, we use 8:2 to split original data.
