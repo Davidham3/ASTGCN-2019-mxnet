@@ -101,8 +101,3 @@ The configuration file config.conf contains three parts: Data, Training and Pred
 + merge: int, 0 or 1, if merge equals 1, merge training set and validation set to train model
 + prediction_filename: str, if you specify this parameter, it will save the prediction of current testing set into this file
 + params_dir: the folder for saving parameters
-
-## Predict
-+ params_file: str, path of parameters
-+ data_file: str, path of input data, which should be in npz format, contain key "data"
-+ prediction_filename: str, the folder for saving prediction results
