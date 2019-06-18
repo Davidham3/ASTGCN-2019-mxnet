@@ -218,8 +218,7 @@ if __name__ == "__main__":
                                  global_step=global_step,
                                  bins=1000)
             except:
-                print(name)
-                print(param.grad())
+                print("can't plot histogram of {}_grad".format(name))
 
         # compute validation loss
         compute_val_loss(net, val_loader, loss_function, sw, epoch)
