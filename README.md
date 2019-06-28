@@ -6,7 +6,7 @@ Attention Based Spatial-Temporal Graph Convolutional Networks for Traffic Flow F
 
 # References
 
-[Shengnan Guo, Youfang Lin, Ning Feng, Chao Song, Huaiyu Wan(*). Attention Based Spatial-Temporal Graph Convolutional Networks for Traffic Flow Forecasting. The 33rd AAAI Conference on Artificial Intelligence (AAAI'19) 2019.] ("papers/2019 AAAI_Attention Based Spatial-Temporal Graph Convolutional Networks for Traffic Flow Forecasting.pdf")
+[Shengnan Guo, Youfang Lin, Ning Feng, Chao Song, Huaiyu Wan(*). Attention Based Spatial-Temporal Graph Convolutional Networks for Traffic Flow Forecasting. The 33rd AAAI Conference on Artificial Intelligence (AAAI'19) 2019.] (papers/2019 AAAI_Attention Based Spatial-Temporal Graph Convolutional Networks for Traffic Flow Forecasting.pdf)
 
 # Datasets
 
